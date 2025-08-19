@@ -39,15 +39,14 @@ export const useOrderData = () => {
             orders: OrderData[];
             nextCursor: string
         }> => {
-            const envVar = import.meta.env.VITE_ENV;
-            console.log(envVar)
+            const proxyUrl = import.meta.env.VITE_API_BASE;
             let url = 'https://api.squarespace.com/1.0/commerce/orders';
 
             if (cursor != ''){
                 url += `?cursor=${cursor}`
             }
 
-            const resp = await fetch(url, {
+            const resp = await fetch(`${proxyUrl}?${url}`, {
                 headers: {
                     'Authorization': `Bearer ${import.meta.env.VITE_SQUARESPACE_KEY}`
                 }
