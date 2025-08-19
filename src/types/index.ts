@@ -7,7 +7,7 @@ export interface OrderItem {
 
 export interface OrderData {
     id: string,
-    orderNumber: number,
+    orderNumber: string,
     name: string,
     email: string,
     subTotal: number,

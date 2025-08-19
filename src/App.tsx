@@ -3,7 +3,7 @@ import Order from './components/Order.tsx';
 import {useOrderData} from "./hooks/useOrderData.tsx";
 
 function App() {
-    const {orders, loading, error} = useOrderData();
+    const {orders, loading, error, hasMore, totalLoaded} = useOrderData();
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('all');
 
@@ -12,41 +12,41 @@ function App() {
 
         const searchLower = searchTerm.toLowerCase();
 
-        return Object.fromEntries(
-            Object.entries(orders).filter(([orderId, order]) => {
-                switch (filterType) {
-                    case 'name':
-                        return order.name.toLowerCase().includes(searchLower);
+        return orders.filter(order => {
+            switch (filterType) {
+                case 'name':
+                    return order.name.toLowerCase().includes(searchLower);
 
-                    case 'orderNumber':
-                        return orderId.includes(searchTerm);
+                case 'orderNumber':
+                    return order.orderNumber.includes(searchTerm);
 
-                    case 'items':
-                        return order.items.some(item =>
-                            item.name.toLowerCase().includes(searchLower) ||
-                            (item.variant && item.variant.toLowerCase().includes(searchLower))
-                        );
+                case 'items':
+                    return order.items.some(item =>
+                        item.itemName.toLowerCase().includes(searchLower) ||
+                        (item.itemVariant && item.itemVariant.toLowerCase().includes(searchLower))
+                    );
 
-                    case 'all':
-                    default:
-                        // Search in name, order ID, and items
-                        const nameMatch = order.name.toLowerCase().includes(searchLower);
-                        const orderIdMatch = orderId.includes(searchTerm);
-                        const itemsMatch = order.items.some(item =>
-                            item.itemName.toLowerCase().includes(searchLower) ||
-                            (item.itemVariant && item.itemVariant.toLowerCase().includes(searchLower))
-                        );
-                        return nameMatch || orderIdMatch || itemsMatch;
-                }
-            })
-        );
+                case 'all':
+                default:
+                    // Search in name, order ID, and items
+                    const nameMatch = order.name.toLowerCase().includes(searchLower);
+                    const orderIdMatch = order.orderNumber.includes(searchTerm);
+                    const itemsMatch = order.items.some(item =>
+                        item.itemName.toLowerCase().includes(searchLower) ||
+                        (item.itemVariant && item.itemVariant.toLowerCase().includes(searchLower))
+                    );
+                    return nameMatch || orderIdMatch || itemsMatch;
+            }
+        });
     }, [orders, searchTerm, filterType]);
 
     const clearSearch = () => {
         setSearchTerm('');
     };
 
-    if (loading) return <div className="p-4">Loading orders...</div>;
+    if (loading && orders.length === 0) {
+        return <div className="p-4">Loading orders...</div>;
+    }
 
     const totalOrders = Object.keys(orders).length;
     const filteredCount = Object.keys(filteredOrders).length;
@@ -91,31 +91,36 @@ function App() {
 
                 <div className="text-sm text-gray-600">
                     Showing {filteredCount} of {totalOrders} orders
+                    {loading && hasMore && (
+                        <span className="ml-2 text-blue-600 font-medium">
+                            (Loading more... {totalLoaded} loaded so far)
+                        </span>
+                    )}
                     {searchTerm && (
                         <span className="ml-2 font-medium">
-              (filtered by "{searchTerm}" in {filterType === 'all' ? 'all fields' : filterType})
-            </span>
+                            (filtered by "{searchTerm}" in {filterType === 'all' ? 'all fields' : filterType})
+                        </span>
                     )}
                 </div>
             </div>
 
-            {error == null
-                ? <div className="space-y-4">
-                    {Object.keys(filteredOrders).length === 0 ? (
+            {error ? (
+                <div className="text-center py-8 text-red-500">
+                    Error loading orders: {error}
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {filteredOrders.length === 0 ? (
                         <div className="text-center py-8 text-gray-500">
                             {searchTerm ? 'No orders match your search criteria.' : 'No orders found.'}
                         </div>
                     ) : (
-                        Object.entries(filteredOrders)
-                            .map(([orderId, order]) => (
-                                <Order key={orderId} order={order} searchTerm={searchTerm}/>
-                            ))
+                        filteredOrders.map(order => (
+                            <Order key={order.id} order={order} searchTerm={searchTerm}/>
+                        ))
                     )}
                 </div>
-                : <div className="text-center py-8 text-gray-500">
-                    Error searching orders...
-                </div>
-            }
+            )}
         </div>
     );
 }

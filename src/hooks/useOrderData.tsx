@@ -1,10 +1,19 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useRef} from 'react';
 import type {OrderData, OrderItem} from "../types/index.ts";
 
-export const useOrderData = () => {
+export const useOrderData = (): {
+    orders: OrderData[];
+    loading: boolean;
+    error: string | null;
+    hasMore: boolean;
+    totalLoaded: number;
+} => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [hasMore, setHasMore] = useState(true);
+    const [totalLoaded, setTotalLoaded] = useState(0);
+    const fetchedRef = useRef(false);
 
     const transformOrder = (rawOrder): OrderData => {
         const order: OrderData = {
@@ -35,21 +44,40 @@ export const useOrderData = () => {
     }
 
     useEffect(() => {
+        if (fetchedRef.current) return;
+        fetchedRef.current = true;
+
         const getOrdersPage = async (cursor: string): Promise<{
             orders: OrderData[];
             nextCursor: string
         }> => {
-            const proxyUrl = import.meta.env.VITE_API_BASE;
-            let url = 'https://api.squarespace.com/1.0/commerce/orders';
+            let fullUrl: string;
+            let headers
+            if (import.meta.env.VITE_ENVIRONMENT === "local") {
+                fullUrl = '/api/squarespace/1.0/commerce/orders'
+                if (cursor != '') {
+                    fullUrl += `?cursor=${cursor}`
+                }
 
-            if (cursor != ''){
-                url += `?cursor=${cursor}`
-            }
-
-            const resp = await fetch(`${proxyUrl}?${url}`, {
-                headers: {
+                headers = {
                     'Authorization': `Bearer ${import.meta.env.VITE_SQUARESPACE_KEY}`
                 }
+            } else {
+                const proxyUrl = import.meta.env.VITE_API_BASE;
+                let url = 'https://api.squarespace.com/1.0/commerce/orders';
+                if (cursor != '') {
+                    url += `?cursor=${cursor}`
+                }
+
+                fullUrl = `${proxyUrl}?url=${url}`
+                headers = {
+                    'Content-Type': 'application/json',
+                }
+            }
+
+            const resp = await fetch(fullUrl, {
+                method: 'GET',
+                headers: headers,
             })
             if (!resp.ok) {
                 setError("Unable to get orders")
@@ -64,38 +92,43 @@ export const useOrderData = () => {
             return {orders, nextCursor};
         }
 
-        const getOrders = async (): Promise<OrderData[]> => {
-            const allOrders: OrderData[] = []
+        const getOrders = async () => {
+            setLoading(true);
+            setError(null);
             let cursor = ''
-            while (true) {
-                const pageData = await getOrdersPage(cursor);
-                allOrders.push(...pageData.orders);
+            try {
+                while (true) {
+                    const pageData = await getOrdersPage(cursor);
+                    setOrders(prev => [...prev, ...pageData.orders]);
+                    setTotalLoaded(prev => prev + pageData.orders.length);
 
-                if (!pageData.nextCursor || pageData.nextCursor === "" || pageData.nextCursor === null) {
-                    break;
-                }else {
-                    cursor = pageData.nextCursor
+                    // Check if there are more pages
+                    if (!pageData.nextCursor) {
+                        setHasMore(false);
+                        break;
+                    }
+                    cursor = pageData.nextCursor;
+
+                    //a small delay to prevent overwhelming the server
+                    await new Promise(resolve => setTimeout(resolve, 100));
                 }
+            } catch (e) {
+                const errorMessage = e instanceof Error ? e.message : String(e);
+                setError(errorMessage);
+                console.error('Error fetching orders:', e);
+            } finally {
+                setLoading(false);
             }
-
-            return allOrders
         }
 
-        setLoading(true)
-        try {
-            getOrders().then(orders => {
-                setOrders(orders);
-            })
-        } catch (e) {
-            setError(e)
-        } finally {
-            setLoading(false)
-        }
-    });
+        getOrders()
+    }, []);
 
     return {
         orders,
         loading,
         error,
+        hasMore,
+        totalLoaded,
     };
 };

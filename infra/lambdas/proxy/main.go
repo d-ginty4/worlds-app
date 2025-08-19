@@ -36,6 +36,14 @@ func makeRequest(url string) (string, error) {
 }
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	// CORS headers for ALL responses
+	corsHeaders := map[string]string{
+		"Access-Control-Allow-Origin":  "https://d-ginty4.github.io",
+		"Access-Control-Allow-Headers": "Content-Type, Authorization",
+		"Access-Control-Allow-Methods": "GET, OPTIONS",
+		"Content-Type":                 "application/json",
+	}
+
 	url := request.QueryStringParameters["url"]
 	fmt.Println(url)
 
@@ -46,10 +54,8 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		Headers: map[string]string{
-			"Content-Type": "application/json",
-		},
-		Body: resp,
+		Headers:    corsHeaders,
+		Body:       resp,
 	}, nil
 }
 
