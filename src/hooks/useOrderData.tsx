@@ -40,7 +40,8 @@ export const useOrderData = () => {
             nextCursor: string
         }> => {
             const env = import.meta.env.VITE_ENV;
-            let url = env == 'dev'
+            console.log(env)
+            let url = env === 'dev'
                 ? '/api/squarespace/1.0/commerce/orders'
                 : 'https://api.squarespace.com/1.0/commerce/orders';
 
