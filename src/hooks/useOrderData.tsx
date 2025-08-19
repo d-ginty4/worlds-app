@@ -39,7 +39,11 @@ export const useOrderData = () => {
             orders: OrderData[];
             nextCursor: string
         }> => {
-            let url = '/api/squarespace/1.0/commerce/orders'
+            const env = import.meta.env.VITE_ENV;
+            let url = env == 'dev'
+                ? '/api/squarespace/1.0/commerce/orders'
+                : 'https://api.squarespace.com/1.0/commerce/orders';
+
             if (cursor != ''){
                 url += `?cursor=${cursor}`
             }
