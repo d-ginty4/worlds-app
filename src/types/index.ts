@@ -12,5 +12,6 @@ export interface OrderData {
     email: string,
     subTotal: number,
     grandTotal: number,
+    refunded: boolean,
     items: OrderItem[],
 }

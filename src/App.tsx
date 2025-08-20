@@ -34,6 +34,11 @@ function App() {
                 }
             )
         },
+        {
+            id: 'refunded',
+            label: 'Refunded Orders',
+            filter: (order: OrderData) => {return order.refunded}
+        },
     ];
 
     const filteredOrders = useMemo(() => {
@@ -86,7 +91,7 @@ function App() {
         ];
 
         const data = []
-        orders.filter(order => order.items.some(item => {
+        orders.filter(order => !order.refunded && order.items.some(item => {
                 return item.itemName.toLowerCase().includes(worldsTickets.toLowerCase())
             }
         )).forEach(order => {
@@ -130,7 +135,7 @@ function App() {
         ];
 
         const data = []
-        orders.filter(order => order.items.some(item => {
+        orders.filter(order => !order.refunded && order.items.some(item => {
                 return item.itemName.toLowerCase().includes(worldsCoachesPass.toLowerCase())
             }
         )).forEach(order => {

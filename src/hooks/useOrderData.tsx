@@ -23,7 +23,12 @@ export const useOrderData = (): {
             email: rawOrder.customerEmail,
             subTotal: rawOrder.subtotal.value,
             grandTotal: rawOrder.grandTotal.value,
+            refunded: false,
             items: []
+        }
+
+        if (rawOrder.refundedTotal.value !== "0.00") {
+            order.refunded = true;
         }
 
         for (const rawItem of rawOrder.lineItems) {

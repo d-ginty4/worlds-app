@@ -12,13 +12,13 @@ function Order({order, searchTerm}: OrderProps) {
                 <h3 className="text-xl font-semibold text-gray-900">
                     Order #<HighlightText text={order.orderNumber} highlight={searchTerm}/>
                 </h3>
-                {/*<span className={`px-2 py-1 rounded text-xs font-medium ${*/}
-                {/*    order.financialStatus === 'PAID'*/}
-                {/*        ? 'bg-green-100 text-green-800'*/}
-                {/*        : 'bg-yellow-100 text-yellow-800'*/}
-                {/*}`}>*/}
-                {/*  {order.financialStatus}*/}
-                {/*</span>*/}
+                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    !order.refunded
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                }`}>
+                  {!order.refunded ? "Paid" : "Refunded"}
+                </span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
