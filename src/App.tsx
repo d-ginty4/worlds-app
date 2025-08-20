@@ -1,15 +1,17 @@
 import {useMemo, useState} from 'react';
 import Order from './components/Order.tsx';
 import {useOrderData} from "./hooks/useOrderData.tsx";
-import type {OrderData} from "./types";
+import type {OrderData, OrderItem} from "./types";
+import downloadData from "./utils/downloadData.ts";
 
 function App() {
     const {orders, loading, error, hasMore, totalLoaded} = useOrderData();
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterType, setFilterType] = useState('all');
     const [activeFilter, setActiveFilter] = useState('all');
 
-    // Built-in filters - customize these based on your specific needs
+    const worldsCoachesPass = `Coach's Pass - Natural Worlds Strongest Man & Woman 2025`
+    const worldsTickets = 'Natural Worlds Strongest Man & Woman 2025 – Weekend Tickets'
+
     const builtInFilters = [
         {
             id: 'all',
@@ -20,8 +22,15 @@ function App() {
             id: 'worldsTickets',
             label: 'Worlds tickets',
             filter: (order: OrderData) => order.items.some(item => {
-                    const worldsTickets = 'Natural Worlds Strongest Man & Woman 2025 – Weekend Tickets'
                     return item.itemName.toLowerCase().includes(worldsTickets.toLowerCase())
+                }
+            )
+        },
+        {
+            id: 'worldsCoachesPass',
+            label: 'Worlds Coaches Passes',
+            filter: (order: OrderData) => order.items.some(item => {
+                    return item.itemName.toLowerCase().includes(worldsCoachesPass.toLowerCase())
                 }
             )
         },
@@ -44,22 +53,9 @@ function App() {
                 item.itemName.toLowerCase().includes(searchLower) ||
                 (item.itemVariant && item.itemVariant.toLowerCase().includes(searchLower)))
 
-            switch (filterType) {
-                case 'name':
-                    return nameMatch
-
-                case 'orderNumber':
-                    return orderIdMatch
-
-                case 'items':
-                    return itemsMatch
-
-                case 'all':
-                default:
-                    return nameMatch || orderIdMatch || itemsMatch;
-            }
+            return nameMatch || orderIdMatch || itemsMatch;
         });
-    }, [orders, searchTerm, filterType, activeFilter]);
+    }, [orders, searchTerm, activeFilter]);
 
     const clearSearch = () => {
         setSearchTerm('');
@@ -75,208 +71,110 @@ function App() {
         : orders.filter(builtInFilters.find(f => f.id === activeFilter).filter).length;
     const filteredCount = filteredOrders.length;
 
-    const printList = () => {
-        const printWindow = window.open('', '_blank');
-
-        const now = new Date();
-        const dateStr = now.toLocaleDateString();
-        const timeStr = now.toLocaleTimeString();
-
-        const filterInfo = activeFilter !== 'all' ?
-            `Filtered by: ${builtInFilters.find(f => f.id === activeFilter)?.label}` :
-            'All Orders';
-
-        const searchInfo = searchTerm ?
-            `Search: "${searchTerm}" in ${filterType === 'all' ? 'all fields' : filterType}` :
-            '';
-
-        const tableRows = filteredOrders.map(order => `
-            <tr>
-                <td>${order.orderNumber}</td>
-                <td>${order.name}</td>
-                <td>${order.email}</td>
-                <td>${order.subTotal.toFixed(2)}</td>
-                <td>${order.grandTotal.toFixed(2)}</td>
-                <td>${order.items.length}</td>
-                <td>
-                    ${order.items.map(item =>
-            `${item.itemName}${item.itemVariant ? ` (${item.itemVariant})` : ''} - Qty: ${item.quantity}, ${item.price.toFixed(2)}`
-        ).join('<br/>')}
-                </td>
-            </tr>
-        `).join('');
-
-        const printContent = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Orders Report</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        margin: 20px;
-                        color: #333;
-                    }
-                    .header {
-                        text-align: center;
-                        margin-bottom: 30px;
-                        border-bottom: 2px solid #333;
-                        padding-bottom: 15px;
-                    }
-                    .header h1 {
-                        margin: 0;
-                        font-size: 24px;
-                    }
-                    .header .info {
-                        margin-top: 10px;
-                        font-size: 14px;
-                        color: #666;
-                    }
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-top: 20px;
-                        font-size: 12px;
-                    }
-                    th, td {
-                        border: 1px solid #ddd;
-                        padding: 8px;
-                        text-align: left;
-                        vertical-align: top;
-                    }
-                    th {
-                        background-color: #f5f5f5;
-                        font-weight: bold;
-                        font-size: 13px;
-                    }
-                    tr:nth-child(even) {
-                        background-color: #f9f9f9;
-                    }
-                    .items-column {
-                        max-width: 300px;
-                        font-size: 11px;
-                        line-height: 1.4;
-                    }
-                    .summary {
-                        margin-top: 20px;
-                        font-size: 14px;
-                        font-weight: bold;
-                    }
-                    @media print {
-                        body { margin: 15px; }
-                        .no-print { display: none; }
-                        table { font-size: 11px; }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <h1>Natural Strongman Worlds - Orders Report</h1>
-                    <div class="info">
-                        <div>Generated on: ${dateStr} at ${timeStr}</div>
-                        <div>${filterInfo}</div>
-                        ${searchInfo ? `<div>${searchInfo}</div>` : ''}
-                        <div>Total Orders: ${filteredCount}</div>
-                    </div>
-                </div>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Order #</th>
-                            <th>Customer</th>
-                            <th>Email</th>
-                            <th>Subtotal</th>
-                            <th>Total</th>
-                            <th>Items</th>
-                            <th class="items-column">Items Details</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${tableRows}
-                    </tbody>
-                </table>
-
-                <div class="summary">
-                    Total Revenue: ${filteredOrders.reduce((sum, order) => sum + order.grandTotal, 0).toFixed(2)}
-                </div>
-
-                <div class="no-print" style="margin-top: 30px; text-align: center;">
-                    <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px; background: #007cba; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                        Print This Report
-                    </button>
-                    <button onclick="window.close()" style="padding: 10px 20px; font-size: 16px; background: #666; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
-                        Close
-                    </button>
-                </div>
-            </body>
-            </html>
-        `;
-
-        printWindow.document.write(printContent);
-        printWindow.document.close();
-        printWindow.focus();
-    };
-
-    const downloadList = () => {
-        // Create CSV headers
+    const downloadWorldsTickets = () => {
         const headers = [
             'Order Number',
             'Name',
-            'Email',
+            "Email",
+            "Ticket Name",
+            "Ticket Type",
+            "Ticket Price",
+            "Quantity",
+            "Day 1",
+            "Day 2",
+            "Day 3",
         ];
 
-        // Convert orders to CSV rows
-        const csvRows = [
-            headers.join(','),
-            ...filteredOrders.map(order => {
-                return [
-                    order.orderNumber,
-                    `"${order.name}"`,
-                    order.email,
-                ].join(',');
-            })
+        const data = []
+        orders.filter(order => order.items.some(item => {
+                return item.itemName.toLowerCase().includes(worldsTickets.toLowerCase())
+            }
+        )).forEach(order => {
+            let tempItem: OrderItem
+            if (order.items.length > 0) {
+                order.items.forEach(item => {
+                    if (item.itemName == worldsTickets){
+                        tempItem = item
+                    }
+                })
+            }else {
+                tempItem = order.items[0]
+            }
+
+            const temp = {
+                orderNumber: order.orderNumber,
+                name: order.name,
+                email: order.email,
+                ticketName: tempItem.itemName,
+                ticketType: tempItem.itemVariant,
+                ticketPrice: tempItem.price,
+                quantity: tempItem.quantity,
+            }
+
+            data.push(temp)
+        })
+
+        downloadData('worlds-2025-tickets', headers, data)
+    }
+
+    const downloadWorldsCoachesPasses = () => {
+        const headers = [
+            'Order Number',
+            'Name',
+            "Email",
+            "Ticket Name",
+            "Quantity",
+            "Day 1",
+            "Day 2",
+            "Day 3",
         ];
 
-        // Create and download the file
-        const csvContent = csvRows.join('\n');
-        const blob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});
-        const link = document.createElement('a');
+        const data = []
+        orders.filter(order => order.items.some(item => {
+                return item.itemName.toLowerCase().includes(worldsCoachesPass.toLowerCase())
+            }
+        )).forEach(order => {
+            let tempItem: OrderItem
+            if (order.items.length > 0) {
+                order.items.forEach(item => {
+                    if (item.itemName == worldsCoachesPass){
+                        tempItem = item
+                    }
+                })
+            }else {
+                tempItem = order.items[0]
+            }
 
-        if (link.download !== undefined) {
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
+            const temp = {
+                orderNumber: order.orderNumber,
+                name: order.name,
+                email: order.email,
+                ticketName: tempItem.itemName,
+                quantity: tempItem.quantity,
+            }
 
-            // Generate filename with current date and filter info
-            const now = new Date();
-            const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD format
-            const filterStr = activeFilter !== 'all' ? `_${activeFilter}` : '';
-            const searchStr = searchTerm ? `_search-${searchTerm.replace(/[^a-zA-Z0-9]/g, '')}` : '';
+            data.push(temp)
+        })
 
-            link.setAttribute('download', `orders_${dateStr}${filterStr}${searchStr}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+        downloadData('worlds-2025-coaches-passes', headers, data)
     }
 
     return (
         <div className="max-w-6xl mx-auto p-4">
-            <h1 className="text-3xl font-bold mb-6">Natural Strongman Worlds: Order Management</h1>
+            <h1 className="text-3xl font-bold mb-6">Natural Strongman: Order Management</h1>
 
             <div className="flex flex-wrap gap-2 pb-4">
                 <button
-                    onClick={printList}
+                    onClick={downloadWorldsTickets}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors bg-green-600 text-white`}
                 >
-                    Print List
+                    Download Worlds Tickets Data
                 </button>
                 <button
-                    onClick={downloadList}
+                    onClick={downloadWorldsCoachesPasses}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors bg-orange-600 text-white`}
                 >
-                    Download List
+                    Download Coaches Passes Data
                 </button>
             </div>
 
@@ -299,7 +197,6 @@ function App() {
                 </div>
             </div>
 
-            {/* Search and Filter Controls */}
             <div className="bg-gray-50 p-4 rounded-lg mb-6 space-y-4">
                 <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
@@ -311,17 +208,6 @@ function App() {
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </div>
-
-                    <select
-                        value={filterType}
-                        onChange={(e) => setFilterType(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        <option value="all">Search All</option>
-                        <option value="name">Customer Name</option>
-                        <option value="orderNumber">Order Number</option>
-                        <option value="items">Items/Products</option>
-                    </select>
 
                     {searchTerm && (
                         <button
@@ -345,11 +231,6 @@ function App() {
                     {loading && hasMore && (
                         <span className="ml-2 text-blue-600 font-medium">
                             (Loading more... {totalLoaded} loaded so far)
-                        </span>
-                    )}
-                    {searchTerm && (
-                        <span className="ml-2 font-medium">
-                            (search: "{searchTerm}" in {filterType === 'all' ? 'all fields' : filterType})
                         </span>
                     )}
                 </div>
