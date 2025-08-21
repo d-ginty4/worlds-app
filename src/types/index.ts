@@ -3,6 +3,7 @@ export interface OrderItem {
     itemVariant?: string;
     price: number;
     quantity: number;
+    misc?: string;
 }
 
 export interface OrderData {

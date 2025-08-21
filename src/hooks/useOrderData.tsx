@@ -36,10 +36,15 @@ export const useOrderData = (): {
                 itemName: rawItem.productName,
                 price: rawItem.unitPricePaid.value,
                 quantity: rawItem.quantity,
+                misc: ""
             }
 
             if (rawItem.variantOptions.length > 0) {
                 item.itemVariant = rawItem.variantOptions[0].value
+            }
+
+            if(rawItem.customizations && rawItem.customizations.length > 0){
+                item.misc = rawItem.customizations[0].value
             }
 
             order.items.push(item)

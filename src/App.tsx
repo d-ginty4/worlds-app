@@ -59,8 +59,11 @@ function App() {
             const itemsMatch = order.items.some(item =>
                 item.itemName.toLowerCase().includes(searchLower) ||
                 (item.itemVariant && item.itemVariant.toLowerCase().includes(searchLower)))
+            const coachMatch = order.items.some(item =>
+                item.misc.toLowerCase().includes(searchLower)
+            )
 
-            return nameMatch || orderIdMatch || itemsMatch;
+            return nameMatch || orderIdMatch || itemsMatch || coachMatch;
         });
     }, [orders, searchTerm, activeFilter]);
 
@@ -97,28 +100,41 @@ function App() {
                 return item.itemName.toLowerCase().includes(worldsTickets.toLowerCase())
             }
         )).forEach(order => {
-            let tempItem: OrderItem
-            if (order.items.length > 0) {
-                order.items.forEach(item => {
-                    if (item.itemName == worldsTickets) {
-                        tempItem = item
-                    }
-                })
-            } else {
-                tempItem = order.items[0]
-            }
-
             const temp = {
                 orderNumber: order.orderNumber,
                 name: order.name,
                 email: order.email,
-                ticketName: tempItem.itemName,
-                ticketType: tempItem.itemVariant,
-                ticketPrice: tempItem.price,
-                quantity: tempItem.quantity,
+                ticketName: "",
+                ticketType:  "",
+                ticketPrice: 0,
+                quantity: 0,
             }
 
-            data.push(temp)
+            if (order.items.length > 0) {
+                order.items.forEach(item => {
+                    if (item.itemName === worldsTickets) {
+                        if (item.itemVariant === "Weekend Tiered Seating"){
+                            temp.ticketName = item.itemName
+                            temp.ticketType = item.itemVariant
+                            temp.ticketPrice = item.price
+                            temp.quantity = item.quantity
+                            data.push(temp)
+                        } else {
+                            temp.ticketName = item.itemName
+                            temp.ticketType = item.itemVariant
+                            temp.ticketPrice = item.price
+                            temp.quantity = item.quantity
+                            data.push(temp)
+                        }
+                    }
+                })
+            } else {
+                temp.ticketName = order.items[0].itemName
+                temp.ticketType = order.items[0].itemVariant
+                temp.ticketPrice = order.items[0].price
+                temp.quantity = order.items[0].quantity
+                data.push(temp)
+            }
         })
 
         downloadData('worlds-2025-tickets', headers, data)
@@ -129,6 +145,7 @@ function App() {
             'Order Number',
             'Name',
             "Email",
+            "Athletes Name",
             "Ticket Name",
             "Quantity",
             "Day 1",
@@ -156,6 +173,7 @@ function App() {
                 orderNumber: order.orderNumber,
                 name: order.name,
                 email: order.email,
+                misc: tempItem.misc,
                 ticketName: tempItem.itemName,
                 quantity: tempItem.quantity,
             }

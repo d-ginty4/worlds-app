@@ -48,9 +48,15 @@ function Order({order, searchTerm}: OrderProps) {
                                 €{item.price} × {item.quantity}
                                   {item.itemVariant && (
                                       <span className="ml-2 text-blue-600">
-                                    (<HighlightText text={item.itemVariant} highlight={searchTerm}/>)
-                                  </span>
+                                        (<HighlightText text={item.itemVariant} highlight={searchTerm}/>)
+                                      </span>
                                   )}
+                                  {item.itemName === "Coach's Pass - Natural Worlds Strongest Man & Woman 2025"
+                                      ? <div className="pt-2 text-blue-600">
+                                            <HighlightText text={item.misc} highlight={searchTerm}/>
+                                        </div>
+                                      : null
+                                  }
                               </span>
                             <span className="font-medium">€{(item.price * item.quantity).toFixed(2)}</span>
                         </div>
@@ -58,10 +64,6 @@ function Order({order, searchTerm}: OrderProps) {
                 ))}
             </div>
 
-            {/*<div className="text-sm text-gray-500">*/}
-            {/*    <p><strong>Billing Address:</strong> {order.billingAddress}</p>*/}
-            {/*    <p><strong>Payment Summary:</strong> {order.paymentSummary}</p>*/}
-            {/*</div>*/}
         </div>
     );
 }
