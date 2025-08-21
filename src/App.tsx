@@ -37,7 +37,9 @@ function App() {
         {
             id: 'refunded',
             label: 'Refunded Orders',
-            filter: (order: OrderData) => {return order.refunded}
+            filter: (order: OrderData) => {
+                return order.refunded
+            }
         },
     ];
 
@@ -98,11 +100,11 @@ function App() {
             let tempItem: OrderItem
             if (order.items.length > 0) {
                 order.items.forEach(item => {
-                    if (item.itemName == worldsTickets){
+                    if (item.itemName == worldsTickets) {
                         tempItem = item
                     }
                 })
-            }else {
+            } else {
                 tempItem = order.items[0]
             }
 
@@ -142,11 +144,11 @@ function App() {
             let tempItem: OrderItem
             if (order.items.length > 0) {
                 order.items.forEach(item => {
-                    if (item.itemName == worldsCoachesPass){
+                    if (item.itemName == worldsCoachesPass) {
                         tempItem = item
                     }
                 })
-            }else {
+            } else {
                 tempItem = order.items[0]
             }
 
@@ -168,31 +170,41 @@ function App() {
         let seatedTickets = 0
         let standingTickets = 0
         orders.forEach(order => {
+            if (order.refunded) {
+                return
+            }
+
             order.items.forEach(item => {
                 if (item.itemName.toLowerCase().includes(worldsTickets.toLowerCase())) {
-                   if (item.itemVariant === "Weekend Tiered Seating") {
-                       seatedTickets += item.quantity
-                   }else {
-                       standingTickets += item.quantity
-                   }
+                    if (item.itemVariant === "Weekend Tiered Seating") {
+                        seatedTickets += item.quantity
+                    } else {
+                        standingTickets += item.quantity
+                    }
                 }
             })
         })
 
         let standingUpgrade = 0
         orders.forEach(order => {
+            if (order.refunded) {
+                return
+            }
             order.items.forEach(item => {
                 if (item.itemName.toLowerCase().includes("Natural Worlds Strongest Man & Woman 2025 – Weekend Standing Upgrade".toLowerCase())) {
-                   standingUpgrade += item.quantity
+                    standingUpgrade += item.quantity
                 }
             })
         })
 
-        let coachesPasss= 0
+        let coachesPass = 0
         orders.forEach(order => {
+            if (order.refunded) {
+                return
+            }
             order.items.forEach(item => {
                 if (item.itemName.toLowerCase().includes(worldsCoachesPass.toLowerCase())) {
-                    coachesPasss += item.quantity
+                    coachesPass += item.quantity
                 }
             })
         })
@@ -200,7 +212,7 @@ function App() {
         let str = `Seated Tickets: ${seatedTickets}\n`
         str += `Standing Tickets: ${standingTickets}\n`
         str += `Standing Upgrade Tickets: ${standingUpgrade}\n`
-        str += `Coaches Pass: ${coachesPasss}\n`
+        str += `Coaches Pass: ${coachesPass}\n`
 
         alert(str)
     }
