@@ -166,57 +166,6 @@ function App() {
         downloadData('worlds-2025-coaches-passes', headers, data)
     }
 
-    const showTicketBreakDownModal = () => {
-        let seatedTickets = 0
-        let standingTickets = 0
-        orders.forEach(order => {
-            if (order.refunded) {
-                return
-            }
-
-            order.items.forEach(item => {
-                if (item.itemName.toLowerCase().includes(worldsTickets.toLowerCase())) {
-                    if (item.itemVariant === "Weekend Tiered Seating") {
-                        seatedTickets += item.quantity
-                    } else {
-                        standingTickets += item.quantity
-                    }
-                }
-            })
-        })
-
-        let standingUpgrade = 0
-        orders.forEach(order => {
-            if (order.refunded) {
-                return
-            }
-            order.items.forEach(item => {
-                if (item.itemName.toLowerCase().includes("Natural Worlds Strongest Man & Woman 2025 – Weekend Standing Upgrade".toLowerCase())) {
-                    standingUpgrade += item.quantity
-                }
-            })
-        })
-
-        let coachesPass = 0
-        orders.forEach(order => {
-            if (order.refunded) {
-                return
-            }
-            order.items.forEach(item => {
-                if (item.itemName.toLowerCase().includes(worldsCoachesPass.toLowerCase())) {
-                    coachesPass += item.quantity
-                }
-            })
-        })
-
-        let str = `Seated Tickets: ${seatedTickets}\n`
-        str += `Standing Tickets: ${standingTickets}\n`
-        str += `Standing Upgrade Tickets: ${standingUpgrade}\n`
-        str += `Coaches Pass: ${coachesPass}\n`
-
-        alert(str)
-    }
-
     return (
         <div className="max-w-6xl mx-auto p-4">
             <h1 className="text-3xl font-bold mb-6">Natural Strongman: Order Management</h1>
@@ -233,12 +182,6 @@ function App() {
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors bg-orange-600 text-white`}
                 >
                     Download Coaches Passes Data
-                </button>
-                <button
-                    onClick={showTicketBreakDownModal}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors bg-purple-600 text-white`}
-                >
-                    Worlds Ticket Breakdown
                 </button>
             </div>
 
