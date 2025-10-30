@@ -19,8 +19,8 @@ export const useOrderData = (): {
         const order: OrderData = {
             id: rawOrder.id,
             orderNumber: rawOrder.orderNumber,
-            name: `${rawOrder.billingAddress.firstName} ${rawOrder.billingAddress.lastName}`,
-            email: rawOrder.customerEmail,
+            name: "<Redacted>",
+            email: "<Redacted>",
             subTotal: rawOrder.subtotal.value,
             grandTotal: rawOrder.grandTotal.value,
             refunded: false,
@@ -32,6 +32,7 @@ export const useOrderData = (): {
         }
 
         for (const rawItem of rawOrder.lineItems) {
+            console.log(rawItem);
             const item: OrderItem = {
                 itemName: rawItem.productName,
                 price: rawItem.unitPricePaid.value,

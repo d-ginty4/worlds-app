@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"io"
 	"net/http"
 	"os"
+	"proxy/types"
 	"time"
 )
 
@@ -45,17 +47,32 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	}
 
 	url := request.QueryStringParameters["url"]
-	fmt.Println(url)
 
 	resp, err := makeRequest(url)
 	if err != nil {
 		panic(err)
 	}
 
+	var result types.Result
+	if err := json.Unmarshal([]byte(resp), &result); err == nil {
+		for _, order := range result.Result {
+			order.BillingAddress = nil
+			order.ShippingAddress = nil
+			order.CustomerEmail = ""
+		}
+
+		out, _ := json.Marshal(result)
+		return events.APIGatewayProxyResponse{
+			StatusCode: 200,
+			Headers:    corsHeaders,
+			Body:       string(out),
+		}, nil
+	}
+
 	return events.APIGatewayProxyResponse{
-		StatusCode: 200,
+		StatusCode: 500,
 		Headers:    corsHeaders,
-		Body:       resp,
+		Body:       "Unable to make request",
 	}, nil
 }
 
