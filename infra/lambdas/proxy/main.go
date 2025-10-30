@@ -55,13 +55,26 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 
 	var result types.Result
 	if err := json.Unmarshal([]byte(resp), &result); err == nil {
+		newResult := types.Result{
+			Pagination: result.Pagination,
+			Result:     []types.Order{},
+		}
 		for _, order := range result.Result {
-			order.BillingAddress = nil
-			order.ShippingAddress = nil
-			order.CustomerEmail = ""
+			newOrder := types.Order{
+				ID:              order.ID,
+				OrderNumber:     order.OrderNumber,
+				GrandTotal:      order.GrandTotal,
+				SubTotal:        order.SubTotal,
+				LineItems:       order.LineItems,
+				BillingAddress:  nil,
+				ShippingAddress: nil,
+				CustomerEmail:   "",
+			}
+
+			newResult.Result = append(newResult.Result, newOrder)
 		}
 
-		out, _ := json.Marshal(result)
+		out, _ := json.Marshal(newResult)
 		return events.APIGatewayProxyResponse{
 			StatusCode: 200,
 			Headers:    corsHeaders,
