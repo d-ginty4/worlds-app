@@ -27,18 +27,20 @@ export const useOrderData = (): {
             items: []
         }
 
-        if (rawOrder.refundedTotal.value !== "0.00") {
+        console.log("here 1");
+        if (rawOrder.refundedTotal && rawOrder.refundedTotal.value !== "0.00") {
             order.refunded = true;
         }
 
+        console.log("here 2");
         for (const rawItem of rawOrder.lineItems) {
-            console.log(rawItem);
             const item: OrderItem = {
                 itemName: rawItem.productName,
                 price: rawItem.unitPricePaid.value,
                 quantity: rawItem.quantity,
             }
 
+            console.log("here 3");
             if (rawItem.variantOptions.length > 0) {
                 item.itemVariant = rawItem.variantOptions[0].value
             }
