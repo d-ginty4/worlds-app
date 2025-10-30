@@ -16,6 +16,7 @@ export const useOrderData = (): {
     const fetchedRef = useRef(false);
 
     const transformOrder = (rawOrder): OrderData => {
+        console.log(rawOrder)
         const order: OrderData = {
             id: rawOrder.id,
             orderNumber: rawOrder.orderNumber,
