@@ -16,24 +16,20 @@ export const useOrderData = (): {
     const fetchedRef = useRef(false);
 
     const transformOrder = (rawOrder): OrderData => {
-        console.log(rawOrder)
         const order: OrderData = {
             id: rawOrder.id,
             orderNumber: rawOrder.orderNumber,
             name: "<Redacted>",
             email: "<Redacted>",
-            subTotal: rawOrder.subtotal.value,
             grandTotal: rawOrder.grandTotal.value,
             refunded: false,
             items: []
         }
 
-        console.log("here 1");
-        if (rawOrder.refundedTotal && rawOrder.refundedTotal.value !== "0.00") {
+        if (rawOrder.refundedTotal.value !== "0.00") {
             order.refunded = true;
         }
 
-        console.log("here 2");
         for (const rawItem of rawOrder.lineItems) {
             const item: OrderItem = {
                 itemName: rawItem.productName,
@@ -41,7 +37,6 @@ export const useOrderData = (): {
                 quantity: rawItem.quantity,
             }
 
-            console.log("here 3");
             if (rawItem.variantOptions.length > 0) {
                 item.itemVariant = rawItem.variantOptions[0].value
             }

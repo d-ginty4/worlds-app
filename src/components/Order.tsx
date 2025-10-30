@@ -57,11 +57,6 @@ function Order({order, searchTerm}: OrderProps) {
                     </div>
                 ))}
             </div>
-
-            {/*<div className="text-sm text-gray-500">*/}
-            {/*    <p><strong>Billing Address:</strong> {order.billingAddress}</p>*/}
-            {/*    <p><strong>Payment Summary:</strong> {order.paymentSummary}</p>*/}
-            {/*</div>*/}
         </div>
     );
 }

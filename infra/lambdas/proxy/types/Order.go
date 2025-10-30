@@ -38,16 +38,22 @@ func (a *Address) String() string {
 	return fmt.Sprintf("Address: %s", str)
 }
 
+type Variant struct {
+	optionName string `json:"optionName"`
+	value      string `json:"value"`
+}
+
 type LineItem struct {
-	ID            string `json:"id"`
-	VariantID     string `json:"variantId"`
-	SKU           string `json:"sku"`
-	ProductID     string `json:"productId"`
-	ProductName   string `json:"productName"`
-	Quantity      int    `json:"quantity"`
-	UnitPricePaid Money  `json:"unitPricePaid"`
-	ImageURL      string `json:"imageUrl"`
-	LineItemType  string `json:"lineItemType"`
+	ID             string    `json:"id"`
+	VariantID      string    `json:"variantId"`
+	SKU            string    `json:"sku"`
+	ProductID      string    `json:"productId"`
+	ProductName    string    `json:"productName"`
+	Quantity       int       `json:"quantity"`
+	UnitPricePaid  Money     `json:"unitPricePaid"`
+	ImageURL       string    `json:"imageUrl"`
+	LineItemType   string    `json:"lineItemType"`
+	VariantOptions []Variant `json:"variantOptions"`
 }
 
 func (l *LineItem) String() string {

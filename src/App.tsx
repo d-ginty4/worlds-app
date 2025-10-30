@@ -1,8 +1,7 @@
 import {useMemo, useState} from 'react';
 import Order from './components/Order.tsx';
 import {useOrderData} from "./hooks/useOrderData.tsx";
-import type {OrderData, OrderItem} from "./types";
-import downloadData from "./utils/downloadData.ts";
+import type {OrderData} from "./types";
 
 function App() {
     const {orders, loading, error, hasMore, totalLoaded} = useOrderData();
@@ -79,91 +78,93 @@ function App() {
     const filteredCount = filteredOrders.length;
 
     const downloadWorldsTickets = () => {
-        const headers = [
-            'Order Number',
-            'Name',
-            "Email",
-            "Ticket Name",
-            "Ticket Type",
-            "Ticket Price",
-            "Quantity",
-            "Day 1",
-            "Day 2",
-            "Day 3",
-        ];
-
-        const data = []
-        orders.filter(order => !order.refunded && order.items.some(item => {
-                return item.itemName.toLowerCase().includes(worldsTickets.toLowerCase())
-            }
-        )).forEach(order => {
-            let tempItem: OrderItem
-            if (order.items.length > 0) {
-                order.items.forEach(item => {
-                    if (item.itemName == worldsTickets) {
-                        tempItem = item
-                    }
-                })
-            } else {
-                tempItem = order.items[0]
-            }
-
-            const temp = {
-                orderNumber: order.orderNumber,
-                name: order.name,
-                email: order.email,
-                ticketName: tempItem.itemName,
-                ticketType: tempItem.itemVariant,
-                ticketPrice: tempItem.price,
-                quantity: tempItem.quantity,
-            }
-
-            data.push(temp)
-        })
-
-        downloadData('worlds-2025-tickets', headers, data)
+        alert("This would download data. Source code still available")
+        // const headers = [
+        //     'Order Number',
+        //     'Name',
+        //     "Email",
+        //     "Ticket Name",
+        //     "Ticket Type",
+        //     "Ticket Price",
+        //     "Quantity",
+        //     "Day 1",
+        //     "Day 2",
+        //     "Day 3",
+        // ];
+        //
+        // const data = []
+        // orders.filter(order => !order.refunded && order.items.some(item => {
+        //         return item.itemName.toLowerCase().includes(worldsTickets.toLowerCase())
+        //     }
+        // )).forEach(order => {
+        //     let tempItem: OrderItem
+        //     if (order.items.length > 0) {
+        //         order.items.forEach(item => {
+        //             if (item.itemName == worldsTickets) {
+        //                 tempItem = item
+        //             }
+        //         })
+        //     } else {
+        //         tempItem = order.items[0]
+        //     }
+        //
+        //     const temp = {
+        //         orderNumber: order.orderNumber,
+        //         name: order.name,
+        //         email: order.email,
+        //         ticketName: tempItem.itemName,
+        //         ticketType: tempItem.itemVariant,
+        //         ticketPrice: tempItem.price,
+        //         quantity: tempItem.quantity,
+        //     }
+        //
+        //     data.push(temp)
+        // })
+        //
+        // downloadData('worlds-2025-tickets', headers, data)
     }
 
     const downloadWorldsCoachesPasses = () => {
-        const headers = [
-            'Order Number',
-            'Name',
-            "Email",
-            "Ticket Name",
-            "Quantity",
-            "Day 1",
-            "Day 2",
-            "Day 3",
-        ];
-
-        const data = []
-        orders.filter(order => !order.refunded && order.items.some(item => {
-                return item.itemName.toLowerCase().includes(worldsCoachesPass.toLowerCase())
-            }
-        )).forEach(order => {
-            let tempItem: OrderItem
-            if (order.items.length > 0) {
-                order.items.forEach(item => {
-                    if (item.itemName == worldsCoachesPass) {
-                        tempItem = item
-                    }
-                })
-            } else {
-                tempItem = order.items[0]
-            }
-
-            const temp = {
-                orderNumber: order.orderNumber,
-                name: order.name,
-                email: order.email,
-                ticketName: tempItem.itemName,
-                quantity: tempItem.quantity,
-            }
-
-            data.push(temp)
-        })
-
-        downloadData('worlds-2025-coaches-passes', headers, data)
+        alert("This would download data. Source code still available")
+        // const headers = [
+        //     'Order Number',
+        //     'Name',
+        //     "Email",
+        //     "Ticket Name",
+        //     "Quantity",
+        //     "Day 1",
+        //     "Day 2",
+        //     "Day 3",
+        // ];
+        //
+        // const data = []
+        // orders.filter(order => !order.refunded && order.items.some(item => {
+        //         return item.itemName.toLowerCase().includes(worldsCoachesPass.toLowerCase())
+        //     }
+        // )).forEach(order => {
+        //     let tempItem: OrderItem
+        //     if (order.items.length > 0) {
+        //         order.items.forEach(item => {
+        //             if (item.itemName == worldsCoachesPass) {
+        //                 tempItem = item
+        //             }
+        //         })
+        //     } else {
+        //         tempItem = order.items[0]
+        //     }
+        //
+        //     const temp = {
+        //         orderNumber: order.orderNumber,
+        //         name: order.name,
+        //         email: order.email,
+        //         ticketName: tempItem.itemName,
+        //         quantity: tempItem.quantity,
+        //     }
+        //
+        //     data.push(temp)
+        // })
+        //
+        // downloadData('worlds-2025-coaches-passes', headers, data)
     }
 
     return (

@@ -66,6 +66,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 				GrandTotal:      order.GrandTotal,
 				SubTotal:        order.SubTotal,
 				LineItems:       order.LineItems,
+				RefundedTotal:   order.RefundedTotal,
 				BillingAddress:  nil,
 				ShippingAddress: nil,
 				CustomerEmail:   "",
